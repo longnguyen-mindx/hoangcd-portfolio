@@ -302,65 +302,91 @@ type ProjectGalleryProps = AppWindowProps & {
 };
 
 function ProjectGalleryWindow({ title, tagline, meta, images, subprojects, comingSoon, ...rest }: ProjectGalleryProps) {
+  const items = subprojects ?? [];
+  const [selected, setSelected] = useState(0);
+  const active = items[selected];
+
   return (
     <WindowShell {...rest} title={title} width={1040} height={680}>
-      <div className="grid h-[calc(100%-48px)] grid-cols-[1fr_1fr] bg-white/82 backdrop-blur-2xl max-md:grid-cols-1">
-        <aside className="overflow-auto border-r border-black/10 bg-white/55 p-6 max-md:border-b max-md:border-r-0">
-          <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/42">Project</div>
-          <h2 className="text-[28px] font-semibold tracking-[-0.02em] text-black/86">{title}</h2>
-          <p className="mt-3 text-[14px] leading-6 text-black/62">{tagline}</p>
-          <div className="mt-6 space-y-2">
-            {meta.map(([k, v]) => (
-              <div key={k} className="flex justify-between gap-4 border-b border-black/8 pb-2 text-[13px]">
-                <span className="font-medium text-black/46">{k}</span>
-                <span className="text-right font-medium text-black/82">{v}</span>
-              </div>
-            ))}
+      <div className="grid h-[calc(100%-48px)] grid-cols-[280px_1fr] bg-white/82 backdrop-blur-2xl max-md:grid-cols-1">
+        <aside className="flex flex-col overflow-hidden border-r border-black/10 bg-white/55">
+          <div className="border-b border-black/10 px-4 py-4">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-black/42">Project</div>
+            <div className="mt-1 text-[15px] font-semibold tracking-[-0.01em] text-black/86">{title}</div>
           </div>
-          {comingSoon ? (
-            <div className="mt-6 rounded-2xl border border-dashed border-black/15 bg-black/4 p-5 text-center text-[13px] text-black/52">
-              Nội dung đang được chuẩn bị.
-              <div className="mt-1 text-[11px] text-black/38">(coming soon)</div>
-            </div>
-          ) : null}
+          <div className="flex-1 overflow-auto py-1">
+            {items.length === 0 ? (
+              <div className="px-4 py-3 text-[12px] text-black/46">Chưa có sub-project.</div>
+            ) : (
+              items.map((sp, idx) => (
+                <button
+                  type="button"
+                  key={sp.name}
+                  onClick={() => setSelected(idx)}
+                  className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] ${idx === selected ? "bg-[#d8a121]/90 text-white" : "text-black/74 hover:bg-black/6"}`}
+                >
+                  <span className={`grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-md ${idx === selected ? "bg-white/30" : "bg-black/8"}`}>
+                    {sp.cover ? (
+                      <img src={sp.cover} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className={`text-[11px] ${idx === selected ? "text-white" : "text-black/46"}`}>▶</span>
+                    )}
+                  </span>
+                  <span className="flex-1 truncate font-medium">{sp.name}</span>
+                  {sp.kind ? (
+                    <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase ${idx === selected ? "bg-white/30 text-white" : "bg-black/8 text-black/58"}`}>
+                      {sp.kind}
+                    </span>
+                  ) : null}
+                </button>
+              ))
+            )}
+          </div>
         </aside>
-        <main className="overflow-auto p-5 space-y-5">
-          {subprojects && subprojects.length > 0 ? (
-            <div>
-              <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/42">Sub-projects</div>
-              <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-                {subprojects.map((sp) => (
-                  <div key={sp.name} className="overflow-hidden rounded-xl border border-black/8 bg-white/70 shadow-sm">
-                    <div className="relative aspect-[4/3] bg-black/8">
-                      {sp.cover ? (
-                        <img src={sp.cover} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="grid h-full w-full place-items-center text-[28px] text-black/30">▶</div>
-                      )}
-                      {sp.kind ? (
-                        <span className="absolute left-2 top-2 rounded-full bg-black/62 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-                          {sp.kind}
-                        </span>
-                      ) : null}
+        <main className="flex flex-col overflow-hidden">
+          <div className="border-b border-black/10 px-6 py-3 text-[12px] font-medium text-black/52">{tagline}</div>
+          <div className="flex-1 overflow-auto p-6">
+            {active ? (
+              <>
+                <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/42">{active.kind ?? "Project"}</div>
+                <h2 className="text-[26px] font-semibold tracking-[-0.02em] text-black/86">{active.name}</h2>
+                <div className="mt-5 overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
+                  {active.cover ? (
+                    <img src={active.cover} alt="" className="block w-full object-cover" />
+                  ) : (
+                    <div className="grid aspect-[16/9] place-items-center text-[42px] text-black/25">▶</div>
+                  )}
+                </div>
+                <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-2 max-sm:grid-cols-1">
+                  {meta.map(([k, v]) => (
+                    <div key={k} className="flex justify-between gap-3 border-b border-black/8 pb-1.5 text-[12px]">
+                      <span className="font-medium text-black/46">{k}</span>
+                      <span className="text-right font-medium text-black/82">{v}</span>
                     </div>
-                    <div className="px-3 py-2 text-[12px] font-medium text-black/72">{sp.name}</div>
+                  ))}
+                </div>
+                {comingSoon ? (
+                  <div className="mt-6 rounded-2xl border border-dashed border-black/15 bg-black/4 p-4 text-center text-[12px] text-black/52">
+                    Nội dung đang được chuẩn bị · coming soon
                   </div>
+                ) : null}
+              </>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-black/15 bg-black/4 p-12 text-center text-[14px] text-black/52">
+                Hình ảnh dự án sẽ được cập nhật sớm.
+              </div>
+            )}
+            {images.length > 0 ? (
+              <div className="mt-6 space-y-4">
+                {images.map((img) => (
+                  <figure key={img.src} className="overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
+                    <img src={img.src} alt="" className="block w-full object-cover" />
+                    <figcaption className="px-4 py-2.5 text-[12px] font-medium text-black/58">{img.caption}</figcaption>
+                  </figure>
                 ))}
               </div>
-            </div>
-          ) : null}
-          {images.length === 0 && (!subprojects || subprojects.length === 0) ? (
-            <div className="rounded-2xl border border-dashed border-black/15 bg-black/4 p-12 text-center text-[14px] text-black/52">
-              Hình ảnh dự án sẽ được cập nhật sớm.
-            </div>
-          ) : (
-            images.map((img) => (
-              <figure key={img.src} className="overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
-                <img src={img.src} alt="" className="block w-full object-cover" />
-                <figcaption className="px-4 py-2.5 text-[12px] font-medium text-black/58">{img.caption}</figcaption>
-              </figure>
-            ))
-          )}
+            ) : null}
+          </div>
         </main>
       </div>
     </WindowShell>
