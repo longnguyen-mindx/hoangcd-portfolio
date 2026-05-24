@@ -362,7 +362,7 @@ export default function MacDock() {
 
   useEffect(() => {
     const open = (id: string) => {
-      if (id === "about" || id === "notes" || id === "aiWorkflows") {
+      if (id in defaultWindows) {
         setWindows((current) => ({
           ...current,
           [id]: { ...current[id as AppId], open: true, minimized: false, closing: false },
