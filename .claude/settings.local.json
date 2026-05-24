@@ -33,7 +33,11 @@
       "Bash(git add *)",
       "Bash(git commit -m 'feat: add AI Generate Workflows project window *)",
       "Bash(git push *)",
-      "Bash(curl -s https://hoangcd-portfolio.vercel.app/)"
+      "Bash(curl -s https://hoangcd-portfolio.vercel.app/)",
+      "Bash(git commit -m 'feat: add 4 project windows for Lighting, Video Creator, Visual Design, Multimedia *)",
+      "Bash(git commit -m 'fix: open handler now accepts all registered window IDs *)",
+      "Bash(curl -sI https://hoangcd-portfolio.vercel.app/)",
+      "Bash(git commit -m 'feat: show subproject grid inside Lighting/Video/Visual Design windows *)"
     ]
   }
 }

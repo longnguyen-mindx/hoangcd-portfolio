@@ -297,10 +297,11 @@ type ProjectGalleryProps = AppWindowProps & {
   tagline: string;
   meta: [string, string][];
   images: { src: string; caption: string }[];
+  subprojects?: { name: string; cover?: string; kind?: string }[];
   comingSoon?: boolean;
 };
 
-function ProjectGalleryWindow({ title, tagline, meta, images, comingSoon, ...rest }: ProjectGalleryProps) {
+function ProjectGalleryWindow({ title, tagline, meta, images, subprojects, comingSoon, ...rest }: ProjectGalleryProps) {
   return (
     <WindowShell {...rest} title={title} width={1040} height={680}>
       <div className="grid h-[calc(100%-48px)] grid-cols-[1fr_1fr] bg-white/82 backdrop-blur-2xl max-md:grid-cols-1">
@@ -323,8 +324,32 @@ function ProjectGalleryWindow({ title, tagline, meta, images, comingSoon, ...res
             </div>
           ) : null}
         </aside>
-        <main className="overflow-auto p-5 space-y-4">
-          {images.length === 0 ? (
+        <main className="overflow-auto p-5 space-y-5">
+          {subprojects && subprojects.length > 0 ? (
+            <div>
+              <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/42">Sub-projects</div>
+              <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+                {subprojects.map((sp) => (
+                  <div key={sp.name} className="overflow-hidden rounded-xl border border-black/8 bg-white/70 shadow-sm">
+                    <div className="relative aspect-[4/3] bg-black/8">
+                      {sp.cover ? (
+                        <img src={sp.cover} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="grid h-full w-full place-items-center text-[28px] text-black/30">▶</div>
+                      )}
+                      {sp.kind ? (
+                        <span className="absolute left-2 top-2 rounded-full bg-black/62 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                          {sp.kind}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="px-3 py-2 text-[12px] font-medium text-black/72">{sp.name}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {images.length === 0 && (!subprojects || subprojects.length === 0) ? (
             <div className="rounded-2xl border border-dashed border-black/15 bg-black/4 p-12 text-center text-[14px] text-black/52">
               Hình ảnh dự án sẽ được cập nhật sớm.
             </div>
@@ -412,9 +437,17 @@ export default function MacDock() {
           ["Subjects", "Beauty, Vespa, Talkshow, TVC"],
           ["Year", "2024 - 2025"],
         ]}
-        images={[
-          { src: "/image/cover-lighting.jpg", caption: "Beauty product lighting" },
-          { src: "/image/cover-multimedia.jpg", caption: "Talkshow set up" },
+        images={[]}
+        subprojects={[
+          { name: "Beauty Product", cover: "/image/cover-lighting.jpg", kind: "Photo" },
+          { name: "Vespa Custom", cover: "/image/cover-vespa-custom.jpg", kind: "Photo" },
+          { name: "Vespa Wheel Rim", cover: "/image/cover-vespa-wheel.jpg", kind: "Photo" },
+          { name: "Talkshow", cover: "/image/cover-multimedia.jpg", kind: "Video" },
+          { name: "TVC - Inspiration", kind: "Video" },
+          { name: "TVC - Lần đầu tiên", kind: "Video" },
+          { name: "TVC - Vòng tay mẹ", kind: "Video" },
+          { name: "Product Promotion - FJN", kind: "Video" },
+          { name: "Product Promotion - Quần áo trẻ em", kind: "Video" },
         ]}
         state={windows.lighting}
         onClose={() => requestClose("lighting")}
@@ -430,8 +463,16 @@ export default function MacDock() {
           ["Clients", "Anais An, LiBé, Skincare Evidence, eTeacher"],
           ["Year", "2023 - 2025"],
         ]}
-        images={[
-          { src: "/image/cover-video.png", caption: "Motion graphics - Credits Card" },
+        images={[]}
+        subprojects={[
+          { name: "Anais An - Quần áo trẻ em", kind: "Video" },
+          { name: "LiBé - Fashion Brand", kind: "Video" },
+          { name: "Skincare Evidence - YT Long", kind: "Video" },
+          { name: "eTeacher - Recap Event", kind: "Video" },
+          { name: "Wedding", kind: "Video" },
+          { name: "Motion - Credits Card", cover: "/image/cover-video.png", kind: "Motion" },
+          { name: "Motion - Product Intro", kind: "Motion" },
+          { name: "Motion - Resistance War", cover: "/image/cover-motion-war.jpg", kind: "Motion" },
         ]}
         state={windows.videoCreator}
         onClose={() => requestClose("videoCreator")}
@@ -447,8 +488,12 @@ export default function MacDock() {
           ["Highlights", "Vespa Sprint, Catalogue"],
           ["Year", "2024"],
         ]}
-        images={[
-          { src: "/image/cover-design.jpg", caption: "Vespa Sprint - Social poster" },
+        images={[]}
+        subprojects={[
+          { name: "Vespa Sprint - Social Poster", cover: "/image/cover-design.jpg", kind: "Poster" },
+          { name: "Catalogue", cover: "/image/cover-design-catalogue.jpg", kind: "Print" },
+          { name: "Social Poster - Series", cover: "/image/cover-design-poster.jpg", kind: "Poster" },
+          { name: "Printing Collection", kind: "Print" },
         ]}
         state={windows.visualDesign}
         onClose={() => requestClose("visualDesign")}
