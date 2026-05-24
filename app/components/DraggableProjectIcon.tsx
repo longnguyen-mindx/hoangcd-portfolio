@@ -15,7 +15,7 @@ const DOCK_SAFE_AREA = 96;
 const FALLBACK_WIDTH = 164;
 const FALLBACK_HEIGHT = 150;
 
-export default function DraggableProjectIcon({ project }: { project: Project }) {
+export default function DraggableProjectIcon({ project, priority = false }: { project: Project; priority?: boolean }) {
   const iconRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0, moved: false });
   const [position, setPosition] = useState<Position>({ x: 0, y: 0, ready: false });
@@ -52,7 +52,7 @@ export default function DraggableProjectIcon({ project }: { project: Project }) 
 
       const dx = event.clientX - dragRef.current.startX;
       const dy = event.clientY - dragRef.current.startY;
-      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragRef.current.moved = true;
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) dragRef.current.moved = true;
 
       setPosition((current) => ({
         ...current,
@@ -82,7 +82,7 @@ export default function DraggableProjectIcon({ project }: { project: Project }) 
       className="absolute w-[116px] touch-none select-none text-center sm:w-[142px] md:w-[164px]"
       style={{ left: position.x, top: position.y, opacity: position.ready ? 1 : 0, zIndex: isDragging ? 25 : 10 }}
       onPointerDown={(event) => {
-        event.preventDefault();
+        if (event.button !== 0) return;
         dragRef.current = {
           active: true,
           startX: event.clientX,
@@ -93,23 +93,29 @@ export default function DraggableProjectIcon({ project }: { project: Project }) 
         };
         setIsDragging(true);
       }}
+      onClick={() => {
+        if (dragRef.current.moved) {
+          dragRef.current.moved = false;
+          return;
+        }
+        if (!project.appId) return;
+        const w = window as unknown as { __openMacApp?: (id: string) => void };
+        if (w.__openMacApp) w.__openMacApp(project.appId);
+        else window.dispatchEvent(new CustomEvent("macdock:open", { detail: { id: project.appId } }));
+      }}
     >
-      <a
-        href="#"
+      <div
         className={`block transition-[filter,transform] duration-200 ease-out hover:brightness-110 ${isDragging ? "scale-105" : "hover:scale-105"}`}
         style={{ transform: `rotate(${project.rotate}deg)` }}
-        onClick={(event) => {
-          if (dragRef.current.moved) event.preventDefault();
-        }}
       >
         <div className="project-shadow relative aspect-[4/3] cursor-grab overflow-hidden rounded-xl border border-white/15 bg-neutral-800 active:cursor-grabbing">
-          <Image src={project.src} alt="" fill sizes="164px" className="object-cover grayscale" draggable={false} />
+          <Image src={project.src} alt="" fill sizes="164px" className="object-cover" draggable={false} priority={priority} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/10" />
         </div>
         <span className="mt-2 block rounded-md px-1 text-[11px] font-light leading-tight text-white/72 drop-shadow md:text-xs">
           {project.label}
         </span>
-      </a>
+      </div>
     </div>
   );
 }

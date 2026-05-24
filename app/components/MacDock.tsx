@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { aboutStats, dockSocials, noteFolders, notePreviews } from "../data/dock";
 
-type AppId = "about" | "notes";
+type AppId = "about" | "notes" | "aiWorkflows";
 
 type WindowState = {
   open: boolean;
@@ -44,6 +44,7 @@ const DOCK_SAFE_AREA = 92;
 const defaultWindows: Record<AppId, WindowState> = {
   about: { open: false, minimized: false, maximized: false, closing: false, x: 80, y: 72 },
   notes: { open: false, minimized: false, maximized: false, closing: false, x: 360, y: 86 },
+  aiWorkflows: { open: false, minimized: false, maximized: false, closing: false, x: 140, y: 60 },
 };
 
 function DockIcon({ label, imageSrc, imageFit = "cover", imagePosition = "center", imageClassName = "", onClick }: DockIconProps) {
@@ -242,6 +243,51 @@ function NotesWindow(props: AppWindowProps) {
   );
 }
 
+function AIWorkflowsWindow(props: AppWindowProps) {
+  return (
+    <WindowShell {...props} title="AI Generate - Workflows" width={1040} height={680}>
+      <div className="grid h-[calc(100%-48px)] grid-cols-[1fr_1fr] bg-white/82 backdrop-blur-2xl max-md:grid-cols-1">
+        <aside className="overflow-auto border-r border-black/10 bg-white/55 p-6 max-md:border-b max-md:border-r-0">
+          <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/42">Project</div>
+          <h2 className="text-[28px] font-semibold tracking-[-0.02em] text-black/86">AI Generate - Workflows</h2>
+          <p className="mt-3 text-[14px] leading-6 text-black/62">
+            Pipeline kết hợp AI generation với editorial direction để dựng concept video nhanh, từ moodboard đến final cut.
+          </p>
+
+          <div className="mt-6 space-y-2">
+            {[
+              ["Stage", "AI concept → cinematic edit"],
+              ["Tools", "OpenArt, DaVinci Resolve, Premiere Pro"],
+              ["Year", "2025"],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-4 border-b border-black/8 pb-2 text-[13px]">
+                <span className="font-medium text-black/46">{k}</span>
+                <span className="text-right font-medium text-black/82">{v}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-dashed border-black/15 bg-black/4 p-5 text-center text-[13px] text-black/52">
+            Final video sẽ được nhúng tại đây.
+            <div className="mt-1 text-[11px] text-black/38">(coming soon)</div>
+          </div>
+        </aside>
+
+        <main className="overflow-auto p-5">
+          <figure className="overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
+            <img src="/image/ai-generate.jpg" alt="AI generated reference" className="block w-full object-cover" />
+            <figcaption className="px-4 py-2.5 text-[12px] font-medium text-black/58">AI generated reference</figcaption>
+          </figure>
+          <figure className="mt-4 overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
+            <img src="/image/ai-timeline.jpg" alt="NLE timeline edit" className="block w-full object-cover" />
+            <figcaption className="px-4 py-2.5 text-[12px] font-medium text-black/58">Timeline edit</figcaption>
+          </figure>
+        </main>
+      </div>
+    </WindowShell>
+  );
+}
+
 export default function MacDock() {
   const [windows, setWindows] = useState(defaultWindows);
 
@@ -260,6 +306,27 @@ export default function MacDock() {
     windows[id].open && !windows[id].minimized ? requestClose(id) : openWindow(id);
   };
 
+  useEffect(() => {
+    const open = (id: string) => {
+      if (id === "about" || id === "notes" || id === "aiWorkflows") {
+        setWindows((current) => ({
+          ...current,
+          [id]: { ...current[id as AppId], open: true, minimized: false, closing: false },
+        }));
+      }
+    };
+    (window as unknown as { __openMacApp?: (id: string) => void }).__openMacApp = open;
+    const handler = (event: Event) => {
+      const id = (event as CustomEvent<{ id?: string }>).detail?.id;
+      if (id) open(id);
+    };
+    window.addEventListener("macdock:open", handler);
+    return () => {
+      window.removeEventListener("macdock:open", handler);
+      delete (window as unknown as { __openMacApp?: (id: string) => void }).__openMacApp;
+    };
+  }, []);
+
   return (
     <>
       <AboutWindow
@@ -275,6 +342,13 @@ export default function MacDock() {
         onMinimize={() => updateWindow("notes", { minimized: true })}
         onMaximize={() => updateWindow("notes", { maximized: !windows.notes.maximized })}
         onMove={(x, y) => updateWindow("notes", { x, y })}
+      />
+      <AIWorkflowsWindow
+        state={windows.aiWorkflows}
+        onClose={() => requestClose("aiWorkflows")}
+        onMinimize={() => updateWindow("aiWorkflows", { minimized: true })}
+        onMaximize={() => updateWindow("aiWorkflows", { maximized: !windows.aiWorkflows.maximized })}
+        onMove={(x, y) => updateWindow("aiWorkflows", { x, y })}
       />
 
       <div className="absolute inset-x-0 bottom-5 z-40 flex justify-center px-4">
