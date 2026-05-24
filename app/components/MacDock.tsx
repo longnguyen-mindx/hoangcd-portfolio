@@ -12,6 +12,7 @@ type WindowState = {
   closing: boolean;
   x: number;
   y: number;
+  focusOrder: number;
 };
 
 type WindowShellProps = {
@@ -23,6 +24,7 @@ type WindowShellProps = {
   onMinimize: () => void;
   onMaximize: () => void;
   onMove: (x: number, y: number) => void;
+  onFocus?: () => void;
   children: React.ReactNode;
 };
 
@@ -42,13 +44,13 @@ const WINDOW_MARGIN = 12;
 const DOCK_SAFE_AREA = 92;
 
 const defaultWindows: Record<AppId, WindowState> = {
-  about: { open: false, minimized: false, maximized: false, closing: false, x: 80, y: 72 },
-  notes: { open: false, minimized: false, maximized: false, closing: false, x: 360, y: 86 },
-  aiWorkflows: { open: false, minimized: false, maximized: false, closing: false, x: 140, y: 60 },
-  lighting: { open: false, minimized: false, maximized: false, closing: false, x: 180, y: 80 },
-  videoCreator: { open: false, minimized: false, maximized: false, closing: false, x: 200, y: 70 },
-  visualDesign: { open: false, minimized: false, maximized: false, closing: false, x: 220, y: 90 },
-  multimedia: { open: false, minimized: false, maximized: false, closing: false, x: 240, y: 100 },
+  about: { open: false, minimized: false, maximized: false, closing: false, x: 80, y: 72, focusOrder: 0 },
+  notes: { open: false, minimized: false, maximized: false, closing: false, x: 360, y: 86, focusOrder: 0 },
+  aiWorkflows: { open: false, minimized: false, maximized: false, closing: false, x: 140, y: 60, focusOrder: 0 },
+  lighting: { open: false, minimized: false, maximized: false, closing: false, x: 180, y: 80, focusOrder: 0 },
+  videoCreator: { open: false, minimized: false, maximized: false, closing: false, x: 200, y: 70, focusOrder: 0 },
+  visualDesign: { open: false, minimized: false, maximized: false, closing: false, x: 220, y: 90, focusOrder: 0 },
+  multimedia: { open: false, minimized: false, maximized: false, closing: false, x: 240, y: 100, focusOrder: 0 },
 };
 
 function DockIcon({ label, imageSrc, imageFit = "cover", imagePosition = "center", imageClassName = "", onClick }: DockIconProps) {
@@ -87,7 +89,7 @@ function TrafficButton({ color, label, onClick }: { color: string; label: string
   );
 }
 
-function WindowShell({ title, state, width = 980, height = 640, onClose, onMinimize, onMaximize, onMove, children }: WindowShellProps) {
+function WindowShell({ title, state, width = 980, height = 640, onClose, onMinimize, onMaximize, onMove, onFocus, children }: WindowShellProps) {
   const windowRef = useRef<HTMLElement>(null);
   const dragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
 
@@ -123,11 +125,12 @@ function WindowShell({ title, state, width = 980, height = 640, onClose, onMinim
     <section
       ref={windowRef}
       aria-label={`${title} window`}
-      className={`mac-window absolute z-30 overflow-hidden text-neutral-950 ${state.closing ? "mac-window-closing" : "mac-window-opening"}`}
+      onPointerDown={() => onFocus?.()}
+      className={`mac-window absolute overflow-hidden text-neutral-950 ${state.closing ? "mac-window-closing" : "mac-window-opening"}`}
       style={
         state.maximized
-          ? { left: 24, top: 32, width: "calc(100vw - 48px)", height: "calc(100vh - 150px)" }
-          : { left: state.x, top: state.y, width: `min(${width}px, 88vw)`, height: `min(${height}px, 74vh)` }
+          ? { left: 24, top: 32, width: "calc(100vw - 48px)", height: "calc(100vh - 150px)", zIndex: 30 + state.focusOrder }
+          : { left: state.x, top: state.y, width: `min(${width}px, 88vw)`, height: `min(${height}px, 74vh)`, zIndex: 30 + state.focusOrder }
       }
     >
       <header
@@ -327,7 +330,7 @@ function ProjectGalleryWindow({ title, tagline, meta, images, subprojects, comin
                 >
                   <span className={`grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-md ${idx === selected ? "bg-white/30" : "bg-black/8"}`}>
                     {sp.cover ? (
-                      <img src={sp.cover} alt="" className="h-full w-full object-cover" />
+                      <img src={sp.cover} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                     ) : (
                       <span className={`text-[11px] ${idx === selected ? "text-white" : "text-black/46"}`}>▶</span>
                     )}
@@ -352,7 +355,7 @@ function ProjectGalleryWindow({ title, tagline, meta, images, subprojects, comin
                 <h2 className="text-[26px] font-semibold tracking-[-0.02em] text-black/86">{active.name}</h2>
                 <div className="mt-5 overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
                   {active.cover ? (
-                    <img src={active.cover} alt="" className="block w-full object-cover" />
+                    <img src={active.cover} alt="" loading="lazy" decoding="async" className="block w-full object-cover" />
                   ) : (
                     <div className="grid aspect-[16/9] place-items-center text-[42px] text-black/25">▶</div>
                   )}
@@ -380,7 +383,7 @@ function ProjectGalleryWindow({ title, tagline, meta, images, subprojects, comin
               <div className="mt-6 space-y-4">
                 {images.map((img) => (
                   <figure key={img.src} className="overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
-                    <img src={img.src} alt="" className="block w-full object-cover" />
+                    <img src={img.src} alt="" loading="lazy" decoding="async" className="block w-full object-cover" />
                     <figcaption className="px-4 py-2.5 text-[12px] font-medium text-black/58">{img.caption}</figcaption>
                   </figure>
                 ))}
@@ -395,16 +398,32 @@ function ProjectGalleryWindow({ title, tagline, meta, images, subprojects, comin
 
 export default function MacDock() {
   const [windows, setWindows] = useState(defaultWindows);
+  const focusCounter = useRef(0);
 
   const updateWindow = (id: AppId, next: Partial<WindowState>) => {
     setWindows((current) => ({ ...current, [id]: { ...current[id], ...next } }));
   };
 
-  const openWindow = (id: AppId) => updateWindow(id, { open: true, minimized: false, closing: false });
+  const bringToFront = (id: AppId) => {
+    focusCounter.current += 1;
+    const order = focusCounter.current;
+    setWindows((current) =>
+      current[id].focusOrder === order ? current : { ...current, [id]: { ...current[id], focusOrder: order } },
+    );
+  };
+
+  const openWindow = (id: AppId) => {
+    focusCounter.current += 1;
+    const order = focusCounter.current;
+    setWindows((current) => ({
+      ...current,
+      [id]: { ...current[id], open: true, minimized: false, closing: false, focusOrder: order },
+    }));
+  };
 
   const requestClose = (id: AppId) => {
     updateWindow(id, { closing: true });
-    window.setTimeout(() => updateWindow(id, { open: false, minimized: false, maximized: false, closing: false }), CLOSE_ANIMATION_MS);
+    window.setTimeout(() => updateWindow(id, { open: false, minimized: false, maximized: false, closing: false, focusOrder: 0 }), CLOSE_ANIMATION_MS);
   };
 
   const toggleWindow = (id: AppId) => {
@@ -413,12 +432,7 @@ export default function MacDock() {
 
   useEffect(() => {
     const open = (id: string) => {
-      if (id in defaultWindows) {
-        setWindows((current) => ({
-          ...current,
-          [id]: { ...current[id as AppId], open: true, minimized: false, closing: false },
-        }));
-      }
+      if (id in defaultWindows) openWindow(id as AppId);
     };
     (window as unknown as { __openMacApp?: (id: string) => void }).__openMacApp = open;
     const handler = (event: Event) => {
@@ -430,6 +444,7 @@ export default function MacDock() {
       window.removeEventListener("macdock:open", handler);
       delete (window as unknown as { __openMacApp?: (id: string) => void }).__openMacApp;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -440,6 +455,7 @@ export default function MacDock() {
         onMinimize={() => updateWindow("about", { minimized: true })}
         onMaximize={() => updateWindow("about", { maximized: !windows.about.maximized })}
         onMove={(x, y) => updateWindow("about", { x, y })}
+        onFocus={() => bringToFront("about")}
       />
       <NotesWindow
         state={windows.notes}
@@ -447,6 +463,7 @@ export default function MacDock() {
         onMinimize={() => updateWindow("notes", { minimized: true })}
         onMaximize={() => updateWindow("notes", { maximized: !windows.notes.maximized })}
         onMove={(x, y) => updateWindow("notes", { x, y })}
+        onFocus={() => bringToFront("notes")}
       />
       <AIWorkflowsWindow
         state={windows.aiWorkflows}
@@ -454,6 +471,7 @@ export default function MacDock() {
         onMinimize={() => updateWindow("aiWorkflows", { minimized: true })}
         onMaximize={() => updateWindow("aiWorkflows", { maximized: !windows.aiWorkflows.maximized })}
         onMove={(x, y) => updateWindow("aiWorkflows", { x, y })}
+        onFocus={() => bringToFront("aiWorkflows")}
       />
       <ProjectGalleryWindow
         title="Lighting & Context Set Up"
@@ -480,6 +498,7 @@ export default function MacDock() {
         onMinimize={() => updateWindow("lighting", { minimized: true })}
         onMaximize={() => updateWindow("lighting", { maximized: !windows.lighting.maximized })}
         onMove={(x, y) => updateWindow("lighting", { x, y })}
+        onFocus={() => bringToFront("lighting")}
       />
       <ProjectGalleryWindow
         title="Video Creator"
@@ -505,6 +524,7 @@ export default function MacDock() {
         onMinimize={() => updateWindow("videoCreator", { minimized: true })}
         onMaximize={() => updateWindow("videoCreator", { maximized: !windows.videoCreator.maximized })}
         onMove={(x, y) => updateWindow("videoCreator", { x, y })}
+        onFocus={() => bringToFront("videoCreator")}
       />
       <ProjectGalleryWindow
         title="Visual Design"
@@ -526,6 +546,7 @@ export default function MacDock() {
         onMinimize={() => updateWindow("visualDesign", { minimized: true })}
         onMaximize={() => updateWindow("visualDesign", { maximized: !windows.visualDesign.maximized })}
         onMove={(x, y) => updateWindow("visualDesign", { x, y })}
+        onFocus={() => bringToFront("visualDesign")}
       />
       <ProjectGalleryWindow
         title="Khóa học Multimedia"
@@ -542,6 +563,7 @@ export default function MacDock() {
         onMinimize={() => updateWindow("multimedia", { minimized: true })}
         onMaximize={() => updateWindow("multimedia", { maximized: !windows.multimedia.maximized })}
         onMove={(x, y) => updateWindow("multimedia", { x, y })}
+        onFocus={() => bringToFront("multimedia")}
       />
 
       <div className="absolute inset-x-0 bottom-5 z-40 flex justify-center px-4">
