@@ -20,7 +20,20 @@
       "Bash(git -C /e/dh config user.name \"longnp\")",
       "Bash(git -C /e/dh config user.email \"longnp.contact@gmail.com\")",
       "Bash(git -C /e/dh add -A)",
-      "Bash(git -C /e/dh status --short)"
+      "Bash(git -C /e/dh status --short)",
+      "Bash(git -C /e/dh commit -m \"Initial commit: macOS-style portfolio landing page\")",
+      "Bash(git -C /e/dh log --oneline -1)",
+      "Bash(git -C /e/dh branch --show-current)",
+      "Bash(git -C /e/dh remote add origin https://github.com/longnguyen-mindx/hoangcd-portfolio.git)",
+      "Bash(git -C /e/dh remote -v)",
+      "Bash(git -C /e/dh push -u origin main)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri https://hoangcd-portfolio.vercel.app/ -UseBasicParsing -TimeoutSec 20; \"status=$\\($r.StatusCode\\) length=$\\($r.Content.Length\\)\" } catch { \"err=$\\($_.Exception.Message\\)\" })",
+      "Bash(echo \"started, pid=$!\")",
+      "PowerShell($r = Invoke-WebRequest -Uri http://localhost:3000 -UseBasicParsing -TimeoutSec 10; \"status=$\\($r.StatusCode\\) length=$\\($r.Content.Length\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m 'feat: add AI Generate Workflows project window *)",
+      "Bash(git push *)",
+      "Bash(curl -s https://hoangcd-portfolio.vercel.app/)"
     ]
   }
 }

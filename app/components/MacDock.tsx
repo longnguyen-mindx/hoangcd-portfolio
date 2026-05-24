@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { aboutStats, dockSocials, noteFolders, notePreviews } from "../data/dock";
 
-type AppId = "about" | "notes" | "aiWorkflows";
+type AppId = "about" | "notes" | "aiWorkflows" | "lighting" | "videoCreator" | "visualDesign" | "multimedia";
 
 type WindowState = {
   open: boolean;
@@ -45,6 +45,10 @@ const defaultWindows: Record<AppId, WindowState> = {
   about: { open: false, minimized: false, maximized: false, closing: false, x: 80, y: 72 },
   notes: { open: false, minimized: false, maximized: false, closing: false, x: 360, y: 86 },
   aiWorkflows: { open: false, minimized: false, maximized: false, closing: false, x: 140, y: 60 },
+  lighting: { open: false, minimized: false, maximized: false, closing: false, x: 180, y: 80 },
+  videoCreator: { open: false, minimized: false, maximized: false, closing: false, x: 200, y: 70 },
+  visualDesign: { open: false, minimized: false, maximized: false, closing: false, x: 220, y: 90 },
+  multimedia: { open: false, minimized: false, maximized: false, closing: false, x: 240, y: 100 },
 };
 
 function DockIcon({ label, imageSrc, imageFit = "cover", imagePosition = "center", imageClassName = "", onClick }: DockIconProps) {
@@ -288,6 +292,56 @@ function AIWorkflowsWindow(props: AppWindowProps) {
   );
 }
 
+type ProjectGalleryProps = AppWindowProps & {
+  title: string;
+  tagline: string;
+  meta: [string, string][];
+  images: { src: string; caption: string }[];
+  comingSoon?: boolean;
+};
+
+function ProjectGalleryWindow({ title, tagline, meta, images, comingSoon, ...rest }: ProjectGalleryProps) {
+  return (
+    <WindowShell {...rest} title={title} width={1040} height={680}>
+      <div className="grid h-[calc(100%-48px)] grid-cols-[1fr_1fr] bg-white/82 backdrop-blur-2xl max-md:grid-cols-1">
+        <aside className="overflow-auto border-r border-black/10 bg-white/55 p-6 max-md:border-b max-md:border-r-0">
+          <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/42">Project</div>
+          <h2 className="text-[28px] font-semibold tracking-[-0.02em] text-black/86">{title}</h2>
+          <p className="mt-3 text-[14px] leading-6 text-black/62">{tagline}</p>
+          <div className="mt-6 space-y-2">
+            {meta.map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-4 border-b border-black/8 pb-2 text-[13px]">
+                <span className="font-medium text-black/46">{k}</span>
+                <span className="text-right font-medium text-black/82">{v}</span>
+              </div>
+            ))}
+          </div>
+          {comingSoon ? (
+            <div className="mt-6 rounded-2xl border border-dashed border-black/15 bg-black/4 p-5 text-center text-[13px] text-black/52">
+              Nội dung đang được chuẩn bị.
+              <div className="mt-1 text-[11px] text-black/38">(coming soon)</div>
+            </div>
+          ) : null}
+        </aside>
+        <main className="overflow-auto p-5 space-y-4">
+          {images.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-black/15 bg-black/4 p-12 text-center text-[14px] text-black/52">
+              Hình ảnh dự án sẽ được cập nhật sớm.
+            </div>
+          ) : (
+            images.map((img) => (
+              <figure key={img.src} className="overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
+                <img src={img.src} alt="" className="block w-full object-cover" />
+                <figcaption className="px-4 py-2.5 text-[12px] font-medium text-black/58">{img.caption}</figcaption>
+              </figure>
+            ))
+          )}
+        </main>
+      </div>
+    </WindowShell>
+  );
+}
+
 export default function MacDock() {
   const [windows, setWindows] = useState(defaultWindows);
 
@@ -349,6 +403,74 @@ export default function MacDock() {
         onMinimize={() => updateWindow("aiWorkflows", { minimized: true })}
         onMaximize={() => updateWindow("aiWorkflows", { maximized: !windows.aiWorkflows.maximized })}
         onMove={(x, y) => updateWindow("aiWorkflows", { x, y })}
+      />
+      <ProjectGalleryWindow
+        title="Lighting & Context Set Up"
+        tagline="Studio và on-location lighting cho beauty product, automotive, talkshow và TVC."
+        meta={[
+          ["Stage", "Photography + Videography"],
+          ["Subjects", "Beauty, Vespa, Talkshow, TVC"],
+          ["Year", "2024 - 2025"],
+        ]}
+        images={[
+          { src: "/image/cover-lighting.jpg", caption: "Beauty product lighting" },
+          { src: "/image/cover-multimedia.jpg", caption: "Talkshow set up" },
+        ]}
+        state={windows.lighting}
+        onClose={() => requestClose("lighting")}
+        onMinimize={() => updateWindow("lighting", { minimized: true })}
+        onMaximize={() => updateWindow("lighting", { maximized: !windows.lighting.maximized })}
+        onMove={(x, y) => updateWindow("lighting", { x, y })}
+      />
+      <ProjectGalleryWindow
+        title="Video Creator"
+        tagline="Long-form và short-form video cho fashion, skincare, wedding, motion graphics và recap event."
+        meta={[
+          ["Format", "Long content + reels + recap"],
+          ["Clients", "Anais An, LiBé, Skincare Evidence, eTeacher"],
+          ["Year", "2023 - 2025"],
+        ]}
+        images={[
+          { src: "/image/cover-video.png", caption: "Motion graphics - Credits Card" },
+        ]}
+        state={windows.videoCreator}
+        onClose={() => requestClose("videoCreator")}
+        onMinimize={() => updateWindow("videoCreator", { minimized: true })}
+        onMaximize={() => updateWindow("videoCreator", { maximized: !windows.videoCreator.maximized })}
+        onMove={(x, y) => updateWindow("videoCreator", { x, y })}
+      />
+      <ProjectGalleryWindow
+        title="Visual Design"
+        tagline="Print collateral và social poster, định hướng visual cho brand campaign."
+        meta={[
+          ["Scope", "Printing + Social Poster"],
+          ["Highlights", "Vespa Sprint, Catalogue"],
+          ["Year", "2024"],
+        ]}
+        images={[
+          { src: "/image/cover-design.jpg", caption: "Vespa Sprint - Social poster" },
+        ]}
+        state={windows.visualDesign}
+        onClose={() => requestClose("visualDesign")}
+        onMinimize={() => updateWindow("visualDesign", { minimized: true })}
+        onMaximize={() => updateWindow("visualDesign", { maximized: !windows.visualDesign.maximized })}
+        onMove={(x, y) => updateWindow("visualDesign", { x, y })}
+      />
+      <ProjectGalleryWindow
+        title="Khóa học Multimedia"
+        tagline="Khoá đào tạo multimedia tổng hợp - đang chuẩn bị nội dung."
+        meta={[
+          ["Status", "Coming soon"],
+          ["Topics", "Photography, video, design"],
+          ["Mentor", "Cao Duy Hoang"],
+        ]}
+        images={[]}
+        comingSoon
+        state={windows.multimedia}
+        onClose={() => requestClose("multimedia")}
+        onMinimize={() => updateWindow("multimedia", { minimized: true })}
+        onMaximize={() => updateWindow("multimedia", { maximized: !windows.multimedia.maximized })}
+        onMove={(x, y) => updateWindow("multimedia", { x, y })}
       />
 
       <div className="absolute inset-x-0 bottom-5 z-40 flex justify-center px-4">
