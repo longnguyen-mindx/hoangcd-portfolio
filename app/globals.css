@@ -1,0 +1,178 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #050505;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "San Francisco", Inter, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+}
+
+.noise-sheet {
+  opacity: 0.13;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px),
+    radial-gradient(circle at 45% 55%, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px);
+  background-size: 9px 9px, 13px 13px, 7px 7px;
+}
+
+.project-shadow {
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.42), 0 2px 12px rgba(255, 255, 255, 0.08) inset;
+}
+
+.apple-dock {
+  position: relative;
+  overflow: visible;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08)),
+    rgba(18, 18, 18, 0.34);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.48),
+    0 1px 0 rgba(255, 255, 255, 0.34) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.25) inset;
+  backdrop-filter: blur(26px) saturate(160%);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+}
+
+.apple-dock::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  pointer-events: none;
+  border-radius: 27px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 42%);
+}
+
+.dock-icon {
+  position: relative;
+  background: #ffffff;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.34),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.08) inset;
+}
+
+.dock-popover {
+  top: -41px;
+  min-width: 54px;
+  text-align: center;
+  border-radius: 14px;
+  border: 0.5px solid rgba(255, 255, 255, 0.72);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(242, 242, 242, 0.84)),
+    rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.24),
+    0 5px 14px rgba(0, 0, 0, 0.16),
+    0 1px 0 rgba(255, 255, 255, 0.85) inset;
+  opacity: 0;
+  transform: translate3d(-50%, 6px, 0) scale(0.96);
+  transform-origin: 50% 100%;
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  transition:
+    opacity 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 210ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dock-popover::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(100% - 4px);
+  width: 11px;
+  height: 11px;
+  border-right: 0.5px solid rgba(255, 255, 255, 0.7);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 2.5px;
+  background: rgba(244, 244, 244, 0.88);
+  box-shadow: 5px 5px 16px rgba(0, 0, 0, 0.1);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.dock-item:hover .dock-popover,
+.dock-item:focus-visible .dock-popover {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0) scale(1);
+}
+
+.mac-window {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: rgba(244, 244, 244, 0.78);
+  box-shadow:
+    0 38px 90px rgba(0, 0, 0, 0.42),
+    0 12px 34px rgba(0, 0, 0, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.72) inset;
+  backdrop-filter: blur(30px) saturate(170%);
+  -webkit-backdrop-filter: blur(30px) saturate(170%);
+}
+
+.mac-titlebar {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(231, 231, 231, 0.64)),
+    rgba(245, 245, 245, 0.76);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+}
+
+.mac-window-opening {
+  animation: mac-window-open 360ms cubic-bezier(0.18, 0.89, 0.24, 1.18) both;
+}
+
+.mac-window-closing {
+  pointer-events: none;
+  animation: mac-window-close 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes mac-window-open {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.82);
+    filter: blur(6px);
+  }
+  58% {
+    opacity: 1;
+    transform: translate3d(0, -3px, 0) scale(1.035);
+    filter: blur(0);
+  }
+  78% {
+    transform: translate3d(0, 1px, 0) scale(0.992);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes mac-window-close {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.86);
+    filter: blur(5px);
+  }
+}
