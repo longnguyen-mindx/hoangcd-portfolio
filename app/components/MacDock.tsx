@@ -318,7 +318,7 @@ type ProjectGalleryProps = AppWindowProps & {
   tagline: string;
   meta: [string, string][];
   images: { src: string; caption: string }[];
-  subprojects?: { name: string; cover?: string; kind?: string; videoUrl?: string }[];
+  subprojects?: { name: string; cover?: string; kind?: string; videoUrl?: string; gallery?: string[] }[];
   comingSoon?: boolean;
 };
 
@@ -407,6 +407,15 @@ function ProjectGalleryWindow({ title, tagline, meta, images, subprojects, comin
                 Hình ảnh dự án sẽ được cập nhật sớm.
               </div>
             )}
+            {active?.gallery && active.gallery.length > 0 ? (
+              <div className="mt-6 space-y-4">
+                {active.gallery.map((src) => (
+                  <figure key={src} className="overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
+                    <img src={src} alt="" loading="lazy" decoding="async" className="block w-full object-cover" />
+                  </figure>
+                ))}
+              </div>
+            ) : null}
             {images.length > 0 ? (
               <div className="mt-6 space-y-4">
                 {images.map((img) => (
@@ -511,13 +520,13 @@ export default function MacDock() {
         ]}
         images={[]}
         subprojects={[
-          { name: "Beauty Product", cover: "/image/cover-lighting.jpg", kind: "Photo" },
-          { name: "Vespa Custom", cover: "/image/cover-vespa-custom.jpg", kind: "Photo" },
-          { name: "Vespa Wheel Rim", cover: "/image/cover-vespa-wheel.jpg", kind: "Photo" },
-          { name: "Talkshow", cover: "/image/cover-multimedia.jpg", kind: "Video", videoUrl: "https://www.youtube.com/embed/0aZLb38ILUs" },
-          { name: "TVC - Inspiration", kind: "Video", videoUrl: "https://www.youtube.com/embed/Ac_qploh3NA" },
-          { name: "TVC - Lần đầu tiên", kind: "Video", videoUrl: "https://www.youtube.com/embed/7bbeYT94QsM" },
-          { name: "TVC - Vòng tay mẹ", kind: "Video", videoUrl: "https://www.youtube.com/embed/ZDKHU6MdyAs" },
+          { name: "Beauty Product", cover: "/image/cover-lighting.jpg", kind: "Photo", gallery: ["/image/gallery/beauty-product/1.jpg","/image/gallery/beauty-product/2.jpg","/image/gallery/beauty-product/3.jpg","/image/gallery/beauty-product/4.jpg","/image/gallery/beauty-product/5.jpg","/image/gallery/beauty-product/6.jpg","/image/gallery/beauty-product/7.jpg","/image/gallery/beauty-product/8.jpg","/image/gallery/beauty-product/9.jpg"] },
+          { name: "Vespa Custom", cover: "/image/cover-vespa-custom.jpg", kind: "Photo", gallery: Array.from({length: 23}, (_, i) => `/image/gallery/vespa-custom/${i + 1}.jpg`) },
+          { name: "Vespa Wheel Rim", cover: "/image/cover-vespa-wheel.jpg", kind: "Photo", gallery: Array.from({length: 8}, (_, i) => `/image/gallery/vespa-wheel/${i + 1}.jpg`) },
+          { name: "Talkshow", cover: "/image/cover-multimedia.jpg", kind: "Video", videoUrl: "https://www.youtube.com/embed/0aZLb38ILUs", gallery: ["/image/gallery/talkshow/1.jpg","/image/gallery/talkshow/2.jpg","/image/gallery/talkshow/3.jpg"] },
+          { name: "TVC - Inspiration", kind: "Video", videoUrl: "https://www.youtube.com/embed/Ac_qploh3NA", gallery: ["/image/gallery/tvc-inspiration/1.jpg","/image/gallery/tvc-inspiration/2.jpg"] },
+          { name: "TVC - Lần đầu tiên", kind: "Video", videoUrl: "https://www.youtube.com/embed/7bbeYT94QsM", gallery: ["/image/gallery/tvc-lan-dau-tien/1.jpg","/image/gallery/tvc-lan-dau-tien/2.jpg"] },
+          { name: "TVC - Vòng tay mẹ", kind: "Video", videoUrl: "https://www.youtube.com/embed/ZDKHU6MdyAs", gallery: ["/image/gallery/tvc-vong-tay-me/1.jpg"] },
           { name: "Product Promotion - FJN", kind: "Video", videoUrl: "https://www.youtube.com/embed/W2Vh_wpl7ok" },
           { name: "Product Promotion - Quần áo trẻ em", kind: "Video", videoUrl: "https://www.youtube.com/embed/t6GH2RWtc_8" },
         ]}
@@ -546,9 +555,9 @@ export default function MacDock() {
           { name: "ColorGrading", kind: "Video", videoUrl: "https://www.youtube.com/embed/GS2wdvfszJ8" },
           { name: "Viral Reels", kind: "Video", videoUrl: "https://www.youtube.com/embed/6O0Migdp7h4" },
           { name: "Motion Graphics - Showreel", kind: "Motion", videoUrl: "https://www.youtube.com/embed/5vy7-wuRHTU" },
-          { name: "Motion - Credits Card", cover: "/image/cover-video.png", kind: "Motion", videoUrl: "https://www.youtube.com/embed/c5_JA4D_xY8" },
-          { name: "Motion - Product Intro", kind: "Motion", videoUrl: "https://www.youtube.com/embed/ZY64FmHbIzQ" },
-          { name: "Motion - Resistance War", cover: "/image/cover-motion-war.jpg", kind: "Motion", videoUrl: "https://www.youtube.com/embed/LT299ie-lMQ" },
+          { name: "Motion - Credits Card", cover: "/image/cover-video.png", kind: "Motion", videoUrl: "https://www.youtube.com/embed/c5_JA4D_xY8", gallery: ["/image/gallery/motion-credits/1.png"] },
+          { name: "Motion - Product Intro", kind: "Motion", videoUrl: "https://www.youtube.com/embed/ZY64FmHbIzQ", gallery: ["/image/gallery/motion-intro/1.jpg","/image/gallery/motion-intro/2.webp"] },
+          { name: "Motion - Resistance War", cover: "/image/cover-motion-war.jpg", kind: "Motion", videoUrl: "https://www.youtube.com/embed/LT299ie-lMQ", gallery: ["/image/gallery/motion-war/1.jpg"] },
         ]}
         state={windows.videoCreator}
         onClose={() => requestClose("videoCreator")}
@@ -567,9 +576,9 @@ export default function MacDock() {
         ]}
         images={[]}
         subprojects={[
-          { name: "Vespa Sprint - Social Poster", cover: "/image/cover-design.jpg", kind: "Poster" },
-          { name: "Catalogue", cover: "/image/cover-design-catalogue.jpg", kind: "Print" },
-          { name: "Social Poster - Series", cover: "/image/cover-design-poster.jpg", kind: "Poster" },
+          { name: "Vespa Sprint - Social Poster", cover: "/image/cover-design.jpg", kind: "Poster", gallery: ["/image/gallery/design-vespa-sprint/1.jpg","/image/gallery/design-vespa-sprint/2.jpg"] },
+          { name: "Catalogue", cover: "/image/cover-design-catalogue.jpg", kind: "Print", gallery: ["/image/gallery/design-catalogue/1.jpg"] },
+          { name: "Social Poster - Series", cover: "/image/cover-design-poster.jpg", kind: "Poster", gallery: ["/image/gallery/design-poster/1-lanbena.jpg","/image/gallery/design-poster/2.jpg","/image/gallery/design-poster/3.jpg"] },
           { name: "Printing Collection", kind: "Print" },
         ]}
         state={windows.visualDesign}
@@ -610,7 +619,7 @@ export default function MacDock() {
           { src: "/image/retention-after.jpg", caption: "After" },
         ]}
         subprojects={[
-          { name: "Tiền Kỳ - Before / After", cover: "/image/retention-after.jpg", kind: "Photo" },
+          { name: "Tiền Kỳ - Before / After", cover: "/image/retention-after.jpg", kind: "Photo", gallery: ["/image/gallery/retention/1-before.jpg","/image/gallery/retention/2-after.jpg"] },
         ]}
         state={windows.retention}
         onClose={() => requestClose("retention")}
