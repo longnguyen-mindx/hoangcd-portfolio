@@ -39,7 +39,7 @@ Cross-component opens use a global function: `MacDock` registers `window.__openM
 
 Reusable window components:
 - `WindowShell` — chrome (titlebar + traffic lights + drag). Reads `state.focusOrder` for z-index.
-- `ProjectGalleryWindow` — Notes-style two-column layout for project pages. Sidebar lists `subprojects[]`; main column shows the selected sub-project's media. If a sub-project has `videoUrl`, it renders an aspect-video YouTube `<iframe>`; otherwise falls back to `cover` `<img>` and finally a ▶ placeholder. Pass `comingSoon` for the placeholder badge.
+- `ProjectGalleryWindow` — Notes-style two-column layout for project pages. Sidebar lists `subprojects[]`; main column shows the selected sub-project's media. If a sub-project has `videoUrl`, it renders an aspect-video YouTube `<iframe>`; otherwise falls back to `cover` `<img>` and finally a ▶ placeholder. Below the hero, every URL in the optional `gallery: string[]` is rendered inline as a `<figure>` so each sub-project shows its full set of stills (assets live under `public/image/gallery/<slug>/`). Pass `comingSoon` for the placeholder badge.
 - `AboutWindow`, `NotesWindow`, `AIWorkflowsWindow` — bespoke layouts. AI Workflows embeds its final cut as a YouTube iframe.
 
 Data is static in `app/data/projects.ts` (thumbnail positions as `left`/`top` percentages plus optional `appId`) and `app/data/dock.ts` (3 social icons — YouTube/Gmail/Zalo as display-only labels with no click handlers, About Me stats, Notes content). The `Project` type allows optional `appId` so not every thumbnail needs to open a window.

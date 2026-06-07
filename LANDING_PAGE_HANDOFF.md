@@ -19,6 +19,7 @@ The current experience includes:
 - Window opening uses a spring/bounce-style scale/fade animation (transform/opacity only — no filter blur).
 - Window focus order is tracked: clicking any window brings it to the front via `focusOrder` z-index.
 - YouTube videos for sub-projects play inline as embedded iframes.
+- Each sub-project can ship a full image gallery (under `public/image/gallery/<slug>/`) that renders below the hero media when selected.
 
 ## Important User Preferences
 
