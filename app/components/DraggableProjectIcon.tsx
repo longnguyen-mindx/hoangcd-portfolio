@@ -17,7 +17,7 @@ const FALLBACK_HEIGHT = 150;
 
 export default function DraggableProjectIcon({ project, priority = false }: { project: Project; priority?: boolean }) {
   const iconRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0, moved: false });
+  const dragRef = useRef({ moved: false });
   const [position, setPosition] = useState<Position>({ x: 0, y: 0, ready: false });
   const [isDragging, setIsDragging] = useState(false);
 
@@ -45,54 +45,54 @@ export default function DraggableProjectIcon({ project, priority = false }: { pr
     return () => window.removeEventListener("resize", placeIcon);
   }, [project.left, project.top]);
 
-  useEffect(() => {
-    const onPointerMove = (event: PointerEvent) => {
-      if (!dragRef.current.active) return;
-      event.preventDefault();
+  const startDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const originX = position.x;
+    const originY = position.y;
+    dragRef.current = { active: true, startX, startY, originX, originY, moved: false };
+    setIsDragging(true);
 
-      const dx = event.clientX - dragRef.current.startX;
-      const dy = event.clientY - dragRef.current.startY;
-      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) dragRef.current.moved = true;
+    let frame = 0;
+    let nextX = originX;
+    let nextY = originY;
 
-      setPosition((current) => ({
-        ...current,
-        ...clampToViewport(dragRef.current.originX + dx, dragRef.current.originY + dy),
-      }));
+    const onPointerMove = (e: PointerEvent) => {
+      e.preventDefault();
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (!dragRef.current.moved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) dragRef.current.moved = true;
+      const clamped = clampToViewport(originX + dx, originY + dy);
+      nextX = clamped.x;
+      nextY = clamped.y;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        setPosition((current) => ({ ...current, x: nextX, y: nextY }));
+      });
     };
 
     const stopDragging = () => {
-      if (!dragRef.current.active) return;
+      if (frame) cancelAnimationFrame(frame);
       dragRef.current.active = false;
       setIsDragging(false);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", stopDragging);
+      window.removeEventListener("pointercancel", stopDragging);
     };
 
     window.addEventListener("pointermove", onPointerMove, { passive: false });
     window.addEventListener("pointerup", stopDragging);
     window.addEventListener("pointercancel", stopDragging);
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", stopDragging);
-      window.removeEventListener("pointercancel", stopDragging);
-    };
-  }, []);
+  };
 
   return (
     <div
       ref={iconRef}
       className="absolute w-[116px] touch-none select-none text-center sm:w-[142px] md:w-[164px]"
       style={{ left: position.x, top: position.y, opacity: position.ready ? 1 : 0, zIndex: isDragging ? 25 : 10 }}
-      onPointerDown={(event) => {
-        if (event.button !== 0) return;
-        dragRef.current = {
-          active: true,
-          startX: event.clientX,
-          startY: event.clientY,
-          originX: position.x,
-          originY: position.y,
-          moved: false,
-        };
-        setIsDragging(true);
-      }}
+      onPointerDown={startDrag}
       onClick={() => {
         if (dragRef.current.moved) {
           dragRef.current.moved = false;

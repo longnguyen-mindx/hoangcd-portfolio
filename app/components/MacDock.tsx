@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { aboutStats, dockSocials, noteFolders, notePreviews } from "../data/dock";
 
-type AppId = "about" | "notes" | "aiWorkflows" | "lighting" | "videoCreator" | "visualDesign" | "multimedia";
+type AppId = "about" | "notes" | "aiWorkflows" | "lighting" | "videoCreator" | "visualDesign" | "multimedia" | "retention" | "buildChannel";
 
 type WindowState = {
   open: boolean;
@@ -51,6 +51,8 @@ const defaultWindows: Record<AppId, WindowState> = {
   videoCreator: { open: false, minimized: false, maximized: false, closing: false, x: 200, y: 70, focusOrder: 0 },
   visualDesign: { open: false, minimized: false, maximized: false, closing: false, x: 220, y: 90, focusOrder: 0 },
   multimedia: { open: false, minimized: false, maximized: false, closing: false, x: 240, y: 100, focusOrder: 0 },
+  retention: { open: false, minimized: false, maximized: false, closing: false, x: 160, y: 90, focusOrder: 0 },
+  buildChannel: { open: false, minimized: false, maximized: false, closing: false, x: 200, y: 110, focusOrder: 0 },
 };
 
 function DockIcon({ label, imageSrc, imageFit = "cover", imagePosition = "center", imageClassName = "", onClick }: DockIconProps) {
@@ -91,33 +93,46 @@ function TrafficButton({ color, label, onClick }: { color: string; label: string
 
 function WindowShell({ title, state, width = 980, height = 640, onClose, onMinimize, onMaximize, onMove, onFocus, children }: WindowShellProps) {
   const windowRef = useRef<HTMLElement>(null);
-  const dragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
 
-  useEffect(() => {
-    const onPointerMove = (event: PointerEvent) => {
-      if (!dragRef.current.active || state.maximized) return;
-      event.preventDefault();
+  const startDrag = (event: React.PointerEvent<HTMLElement>) => {
+    if (state.maximized || (event.target as HTMLElement).closest("button")) return;
+    event.preventDefault();
 
-      const currentWidth = windowRef.current?.offsetWidth ?? width;
-      const currentHeight = windowRef.current?.offsetHeight ?? 520;
-      const nextX = Math.max(WINDOW_MARGIN, Math.min(window.innerWidth - currentWidth - WINDOW_MARGIN, dragRef.current.originX + event.clientX - dragRef.current.startX));
-      const nextY = Math.max(WINDOW_MARGIN, Math.min(window.innerHeight - currentHeight - DOCK_SAFE_AREA, dragRef.current.originY + event.clientY - dragRef.current.startY));
-      onMove(nextX, nextY);
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const originX = state.x;
+    const originY = state.y;
+    const currentWidth = windowRef.current?.offsetWidth ?? width;
+    const currentHeight = windowRef.current?.offsetHeight ?? 520;
+    const maxX = window.innerWidth - currentWidth - WINDOW_MARGIN;
+    const maxY = window.innerHeight - currentHeight - DOCK_SAFE_AREA;
+
+    let frame = 0;
+    let lastX = originX;
+    let lastY = originY;
+
+    const onPointerMove = (e: PointerEvent) => {
+      e.preventDefault();
+      lastX = Math.max(WINDOW_MARGIN, Math.min(maxX, originX + e.clientX - startX));
+      lastY = Math.max(WINDOW_MARGIN, Math.min(maxY, originY + e.clientY - startY));
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        onMove(lastX, lastY);
+      });
     };
 
     const stopDragging = () => {
-      dragRef.current.active = false;
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", stopDragging);
+      window.removeEventListener("pointercancel", stopDragging);
     };
 
     window.addEventListener("pointermove", onPointerMove, { passive: false });
     window.addEventListener("pointerup", stopDragging);
     window.addEventListener("pointercancel", stopDragging);
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", stopDragging);
-      window.removeEventListener("pointercancel", stopDragging);
-    };
-  }, [onMove, state.maximized, width]);
+  };
 
   if (!state.open || state.minimized) return null;
 
@@ -135,11 +150,7 @@ function WindowShell({ title, state, width = 980, height = 640, onClose, onMinim
     >
       <header
         className="mac-titlebar flex h-12 cursor-default items-center border-b border-black/10 px-4 active:cursor-grabbing"
-        onPointerDown={(event) => {
-          if (state.maximized || (event.target as HTMLElement).closest("button")) return;
-          event.preventDefault();
-          dragRef.current = { active: true, startX: event.clientX, startY: event.clientY, originX: state.x, originY: state.y };
-        }}
+        onPointerDown={startDrag}
       >
         <div className="flex items-center gap-2">
           <TrafficButton color="#ff5f57" label={`Close ${title}`} onClick={onClose} />
@@ -274,9 +285,16 @@ function AIWorkflowsWindow(props: AppWindowProps) {
             ))}
           </div>
 
-          <div className="mt-6 rounded-2xl border border-dashed border-black/15 bg-black/4 p-5 text-center text-[13px] text-black/52">
-            Final video sẽ được nhúng tại đây.
-            <div className="mt-1 text-[11px] text-black/38">(coming soon)</div>
+          <div className="mt-6 overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
+            <div className="relative aspect-video w-full">
+              <iframe
+                src="https://www.youtube.com/embed/JkqYxfFT-G0?controls=1&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1"
+                title="AI Generate - Workflows"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="absolute inset-0 h-full w-full"
+              />
+            </div>
           </div>
         </aside>
 
@@ -300,7 +318,7 @@ type ProjectGalleryProps = AppWindowProps & {
   tagline: string;
   meta: [string, string][];
   images: { src: string; caption: string }[];
-  subprojects?: { name: string; cover?: string; kind?: string }[];
+  subprojects?: { name: string; cover?: string; kind?: string; videoUrl?: string }[];
   comingSoon?: boolean;
 };
 
@@ -354,7 +372,17 @@ function ProjectGalleryWindow({ title, tagline, meta, images, subprojects, comin
                 <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/42">{active.kind ?? "Project"}</div>
                 <h2 className="text-[26px] font-semibold tracking-[-0.02em] text-black/86">{active.name}</h2>
                 <div className="mt-5 overflow-hidden rounded-2xl border border-black/8 bg-black/5 shadow-sm">
-                  {active.cover ? (
+                  {active.videoUrl ? (
+                    <div className="relative aspect-video w-full">
+                      <iframe
+                        src={`${active.videoUrl}?controls=1&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1`}
+                        title={active.name}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="absolute inset-0 h-full w-full"
+                      />
+                    </div>
+                  ) : active.cover ? (
                     <img src={active.cover} alt="" loading="lazy" decoding="async" className="block w-full object-cover" />
                   ) : (
                     <div className="grid aspect-[16/9] place-items-center text-[42px] text-black/25">▶</div>
@@ -486,12 +514,12 @@ export default function MacDock() {
           { name: "Beauty Product", cover: "/image/cover-lighting.jpg", kind: "Photo" },
           { name: "Vespa Custom", cover: "/image/cover-vespa-custom.jpg", kind: "Photo" },
           { name: "Vespa Wheel Rim", cover: "/image/cover-vespa-wheel.jpg", kind: "Photo" },
-          { name: "Talkshow", cover: "/image/cover-multimedia.jpg", kind: "Video" },
-          { name: "TVC - Inspiration", kind: "Video" },
-          { name: "TVC - Lần đầu tiên", kind: "Video" },
-          { name: "TVC - Vòng tay mẹ", kind: "Video" },
-          { name: "Product Promotion - FJN", kind: "Video" },
-          { name: "Product Promotion - Quần áo trẻ em", kind: "Video" },
+          { name: "Talkshow", cover: "/image/cover-multimedia.jpg", kind: "Video", videoUrl: "https://www.youtube.com/embed/0aZLb38ILUs" },
+          { name: "TVC - Inspiration", kind: "Video", videoUrl: "https://www.youtube.com/embed/Ac_qploh3NA" },
+          { name: "TVC - Lần đầu tiên", kind: "Video", videoUrl: "https://www.youtube.com/embed/7bbeYT94QsM" },
+          { name: "TVC - Vòng tay mẹ", kind: "Video", videoUrl: "https://www.youtube.com/embed/ZDKHU6MdyAs" },
+          { name: "Product Promotion - FJN", kind: "Video", videoUrl: "https://www.youtube.com/embed/W2Vh_wpl7ok" },
+          { name: "Product Promotion - Quần áo trẻ em", kind: "Video", videoUrl: "https://www.youtube.com/embed/t6GH2RWtc_8" },
         ]}
         state={windows.lighting}
         onClose={() => requestClose("lighting")}
@@ -510,14 +538,17 @@ export default function MacDock() {
         ]}
         images={[]}
         subprojects={[
-          { name: "Anais An - Quần áo trẻ em", kind: "Video" },
-          { name: "LiBé - Fashion Brand", kind: "Video" },
-          { name: "Skincare Evidence - YT Long", kind: "Video" },
-          { name: "eTeacher - Recap Event", kind: "Video" },
-          { name: "Wedding", kind: "Video" },
-          { name: "Motion - Credits Card", cover: "/image/cover-video.png", kind: "Motion" },
-          { name: "Motion - Product Intro", kind: "Motion" },
-          { name: "Motion - Resistance War", cover: "/image/cover-motion-war.jpg", kind: "Motion" },
+          { name: "Anais An - Quần áo trẻ em", kind: "Video", videoUrl: "https://www.youtube.com/embed/zTyrKMaLdYQ" },
+          { name: "LiBé - Fashion Brand", kind: "Video", videoUrl: "https://www.youtube.com/embed/Orn-oNEBFkw" },
+          { name: "Skincare Evidence - YT Long", kind: "Video", videoUrl: "https://www.youtube.com/embed/GH2logEmPGg" },
+          { name: "eTeacher - Recap Event", kind: "Video", videoUrl: "https://www.youtube.com/embed/j2U4I0ngUMc" },
+          { name: "Wedding", kind: "Video", videoUrl: "https://www.youtube.com/embed/-MLB999cT9Q" },
+          { name: "ColorGrading", kind: "Video", videoUrl: "https://www.youtube.com/embed/GS2wdvfszJ8" },
+          { name: "Viral Reels", kind: "Video", videoUrl: "https://www.youtube.com/embed/6O0Migdp7h4" },
+          { name: "Motion Graphics - Showreel", kind: "Motion", videoUrl: "https://www.youtube.com/embed/5vy7-wuRHTU" },
+          { name: "Motion - Credits Card", cover: "/image/cover-video.png", kind: "Motion", videoUrl: "https://www.youtube.com/embed/c5_JA4D_xY8" },
+          { name: "Motion - Product Intro", kind: "Motion", videoUrl: "https://www.youtube.com/embed/ZY64FmHbIzQ" },
+          { name: "Motion - Resistance War", cover: "/image/cover-motion-war.jpg", kind: "Motion", videoUrl: "https://www.youtube.com/embed/LT299ie-lMQ" },
         ]}
         state={windows.videoCreator}
         onClose={() => requestClose("videoCreator")}
@@ -566,9 +597,49 @@ export default function MacDock() {
         onFocus={() => bringToFront("multimedia")}
       />
 
+      <ProjectGalleryWindow
+        title="Retention Visual Skills"
+        tagline="Tiền kỳ visual: định hướng concept, retouch và colour grading để giữ chân người xem."
+        meta={[
+          ["Stage", "Pre-production · Visual"],
+          ["Tools", "Photoshop, Lightroom"],
+          ["Year", "2024 - 2025"],
+        ]}
+        images={[
+          { src: "/image/retention-before.jpg", caption: "Before" },
+          { src: "/image/retention-after.jpg", caption: "After" },
+        ]}
+        subprojects={[
+          { name: "Tiền Kỳ - Before / After", cover: "/image/retention-after.jpg", kind: "Photo" },
+        ]}
+        state={windows.retention}
+        onClose={() => requestClose("retention")}
+        onMinimize={() => updateWindow("retention", { minimized: true })}
+        onMaximize={() => updateWindow("retention", { maximized: !windows.retention.maximized })}
+        onMove={(x, y) => updateWindow("retention", { x, y })}
+        onFocus={() => bringToFront("retention")}
+      />
+      <ProjectGalleryWindow
+        title="Build a Channel"
+        tagline="Hệ thống xây dựng kênh truyền thông: shooting + videography - đang chuẩn bị nội dung."
+        meta={[
+          ["Status", "Coming soon"],
+          ["Scope", "Photographer + Videographer"],
+          ["Mentor", "Cao Duy Hoang"],
+        ]}
+        images={[]}
+        comingSoon
+        state={windows.buildChannel}
+        onClose={() => requestClose("buildChannel")}
+        onMinimize={() => updateWindow("buildChannel", { minimized: true })}
+        onMaximize={() => updateWindow("buildChannel", { maximized: !windows.buildChannel.maximized })}
+        onMove={(x, y) => updateWindow("buildChannel", { x, y })}
+        onFocus={() => bringToFront("buildChannel")}
+      />
+
       <div className="absolute inset-x-0 bottom-5 z-40 flex justify-center px-4">
         <nav aria-label="macOS style dock" className="apple-dock flex items-end justify-center gap-3 px-4 py-3">
-          <DockIcon label="About Me" imageSrc="/image/icon_apple.jpg" imageClassName="-translate-y-[10px] scale-[1.12]" onClick={() => toggleWindow("about")} />
+          <DockIcon label="About Me" imageSrc="/image/icon_apple.jpg" imageClassName="scale-[1.12]" onClick={() => toggleWindow("about")} />
           <DockIcon label="Notes" imageSrc="/image/notes.svg" imageFit="contain" onClick={() => toggleWindow("notes")} />
           <div className="mx-1 h-11 w-px self-center bg-white/28 shadow-[1px_0_0_rgba(0,0,0,0.22)]" />
           {dockSocials.map((social) => (
