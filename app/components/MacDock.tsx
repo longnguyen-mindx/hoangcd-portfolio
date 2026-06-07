@@ -639,7 +639,7 @@ export default function MacDock() {
 
       <div className="absolute inset-x-0 bottom-5 z-40 flex justify-center px-4">
         <nav aria-label="macOS style dock" className="apple-dock flex items-end justify-center gap-3 px-4 py-3">
-          <DockIcon label="About Me" imageSrc="/image/icon_apple.jpg" imageClassName="scale-[1.12]" onClick={() => toggleWindow("about")} />
+          <DockIcon label="About Me" imageSrc="/image/icon_apple.jpg" imageClassName="-translate-y-[10px] scale-[1.12]" onClick={() => toggleWindow("about")} />
           <DockIcon label="Notes" imageSrc="/image/notes.svg" imageFit="contain" onClick={() => toggleWindow("notes")} />
           <div className="mx-1 h-11 w-px self-center bg-white/28 shadow-[1px_0_0_rgba(0,0,0,0.22)]" />
           {dockSocials.map((social) => (

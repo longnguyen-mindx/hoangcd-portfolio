@@ -51,7 +51,7 @@ export default function DraggableProjectIcon({ project, priority = false }: { pr
     const startY = event.clientY;
     const originX = position.x;
     const originY = position.y;
-    dragRef.current = { active: true, startX, startY, originX, originY, moved: false };
+    dragRef.current.moved = false;
     setIsDragging(true);
 
     let frame = 0;
@@ -75,7 +75,6 @@ export default function DraggableProjectIcon({ project, priority = false }: { pr
 
     const stopDragging = () => {
       if (frame) cancelAnimationFrame(frame);
-      dragRef.current.active = false;
       setIsDragging(false);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", stopDragging);
