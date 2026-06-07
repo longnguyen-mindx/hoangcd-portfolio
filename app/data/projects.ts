@@ -4,6 +4,8 @@
   { src: "/image/cover-video.png", label: "Video Creator", left: 14, top: 56, rotate: 1.5, appId: "videoCreator" },
   { src: "/image/cover-design.jpg", label: "Visual Design", left: 72, top: 56, rotate: -1.7, appId: "visualDesign" },
   { src: "/image/cover-multimedia.jpg", label: "Khóa học Multimedia (Coming Soon)", left: 84, top: 35, rotate: 0.9, appId: "multimedia" },
+  { src: "/image/retention-after.jpg", label: "Retention Visual Skills", left: 30, top: 30, rotate: -1.1, appId: "retention" },
+  { src: "/image/cover-build-channel.jpg", label: "Build a Channel (Coming Soon)", left: 56, top: 30, rotate: 1.8, appId: "buildChannel" },
 ] as const;
 
 export type Project = {

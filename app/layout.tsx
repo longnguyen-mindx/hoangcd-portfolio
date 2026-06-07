@@ -4,6 +4,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Personal Portfolio",
   description: "A macOS desktop-inspired personal portfolio landing page.",
+  icons: {
+    icon: "/image/icon_apple.jpg",
+    shortcut: "/image/icon_apple.jpg",
+    apple: "/image/icon_apple.jpg",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
