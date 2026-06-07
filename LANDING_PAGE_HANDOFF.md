@@ -10,13 +10,15 @@ The current experience includes:
 - Background image from `/public/image/port_backgounrd.png`.
 - Scattered draggable project thumbnails, styled like loose macOS desktop items.
 - A glassmorphism macOS-style dock centered at the bottom.
-- Dock icons for About Me, Notes, YouTube, Instagram, Gmail, and Zalo.
+- Dock icons for About Me, Notes, plus 3 display-only social labels (YouTube · Coming Soon, Gmail address, Zalo phone).
 - macOS-like tooltips/popovers above dock icons.
-- About Me and Notes windows that open inside the page.
+- 9 in-page windows: About Me, Notes, AI Workflows, Lighting, Video Creator, Visual Design, Multimedia, Retention Visual Skills, Build a Channel.
 - Windows can be dragged by the titlebar.
 - Windows have macOS traffic-light buttons: close, minimize, zoom/restore.
-- Clicking About Me or Notes dock icon toggles that app window open/closed.
-- Window opening uses a spring/bounce-style scale/fade animation.
+- Clicking a dock icon or a desktop thumbnail with `appId` toggles the matching window open/closed.
+- Window opening uses a spring/bounce-style scale/fade animation (transform/opacity only — no filter blur).
+- Window focus order is tracked: clicking any window brings it to the front via `focusOrder` z-index.
+- YouTube videos for sub-projects play inline as embedded iframes.
 
 ## Important User Preferences
 
@@ -88,17 +90,28 @@ app/
     projects.ts
 public/
   image/
-    port_backgounrd.png
-    icon_apple.jpg
+    port_backgounrd.png         # canonical background (typo intentional)
+    icon_apple.jpg              # About icon + favicon
     notes.svg
     youtube.svg
-    instagram.svg
     gmail.svg
     zalo.svg
-    project-a.jpg
-    project-b.jpg
-    project-c.jpg
-    project-d.jpg
+    profile_image.jpg
+    hero.jpg
+    ai-generate.jpg
+    ai-timeline.jpg
+    cover-lighting.jpg
+    cover-vespa-custom.jpg
+    cover-vespa-wheel.jpg
+    cover-multimedia.jpg
+    cover-video.png
+    cover-motion-war.jpg
+    cover-design.jpg
+    cover-design-catalogue.jpg
+    cover-design-poster.jpg
+    cover-build-channel.jpg
+    retention-before.jpg
+    retention-after.jpg
 ```
 
 ## Main Files
@@ -126,10 +139,13 @@ Client component for draggable thumbnails.
 Behavior:
 
 - Initial thumbnail position is based on `left` and `top` percentages from data.
-- Drag uses global `pointermove` and `pointerup` listeners so the item follows the pointer reliably.
+- Drag is scoped: `pointermove`/`pointerup` listeners are attached only inside `startDrag` and torn down on `pointerup`.
+- Position updates are throttled with `requestAnimationFrame` so a single setState lands per frame.
 - Position is clamped inside the viewport.
 - Bottom safe area prevents thumbnails from being dragged into the dock area.
 - Thumbnail rises above others while being dragged.
+- Click vs drag is separated by a 5px movement threshold (`dragRef.moved`).
+- A thumbnail with `appId` opens the matching window via `window.__openMacApp(id)` (fallback: `macdock:open` CustomEvent).
 
 Important constants:
 
@@ -158,13 +174,21 @@ type WindowState = {
   closing: boolean;
   x: number;
   y: number;
+  focusOrder: number;
 };
 ```
 
-Default positions:
+Default positions (used until first user drag):
 
-- About Me: left side, `{ x: 80, y: 72 }`
-- Notes: right offset, `{ x: 360, y: 86 }`
+- About Me: `{ x: 80, y: 72 }`
+- Notes: `{ x: 360, y: 86 }`
+- AI Workflows: `{ x: 140, y: 60 }`
+- Lighting: `{ x: 180, y: 80 }`
+- Video Creator: `{ x: 200, y: 70 }`
+- Visual Design: `{ x: 220, y: 90 }`
+- Multimedia: `{ x: 240, y: 100 }`
+- Retention Visual Skills: `{ x: 160, y: 90 }`
+- Build a Channel: `{ x: 200, y: 110 }`
 
 Clicking the About Me or Notes dock icon toggles its window:
 
@@ -184,16 +208,16 @@ Window dragging:
 Project thumbnails data:
 
 ```ts
-{ src, label, left, top, rotate }
+{ src, label, left, top, rotate, appId? }
 ```
 
-`left` and `top` are percentages for initial placement.
+`left` and `top` are percentages for initial placement. `appId` (optional) routes a click to a specific window via `window.__openMacApp(id)`.
 
 ### `app/data/dock.ts`
 
 Static data for:
 
-- Social dock icons.
+- 3 social dock icons (display-only labels, no click handlers): `YouTube · Coming Soon`, `hoangcd.contact@gmail.com`, `Zalo · 0332038903`.
 - About Me stats.
 - Notes folders.
 - Notes preview list.
@@ -228,23 +252,21 @@ The open animation intentionally uses overshoot/bounce:
 
 The browser-visible assets must live in `/public/image`.
 
-The original uploaded assets may also exist in `/image`, but Next serves static public files from `/public`.
+The original uploaded assets may also exist in `/image` or under `Joseph_s Portfolio/` (gitignored), but Next serves static public files from `/public`.
 
 Important current assets:
 
-- Background: `/image/port_backgounrd.png`
-- About Me icon: `/image/icon_apple.jpg`
+- Background: `/image/port_backgounrd.png` (typo intentional; canonical name)
+- About Me icon + favicon: `/image/icon_apple.jpg`
+- Profile photo: `/image/profile_image.jpg`
 - Notes icon: `/image/notes.svg`
-- Social icons:
-  - `/image/youtube.svg`
-  - `/image/instagram.svg`
-  - `/image/gmail.svg`
-  - `/image/zalo.svg`
-- Project thumbnails:
-  - `/image/project-a.jpg`
-  - `/image/project-b.jpg`
-  - `/image/project-c.jpg`
-  - `/image/project-d.jpg`
+- Social icons: `/image/youtube.svg`, `/image/gmail.svg`, `/image/zalo.svg`
+- AI Workflows: `/image/ai-generate.jpg`, `/image/ai-timeline.jpg`
+- Lighting: `/image/cover-lighting.jpg`, `/image/cover-vespa-custom.jpg`, `/image/cover-vespa-wheel.jpg`, `/image/cover-multimedia.jpg`
+- Video Creator: `/image/cover-video.png`, `/image/cover-motion-war.jpg`
+- Visual Design: `/image/cover-design.jpg`, `/image/cover-design-catalogue.jpg`, `/image/cover-design-poster.jpg`
+- Retention Visual Skills: `/image/retention-before.jpg`, `/image/retention-after.jpg`
+- Build a Channel: `/image/cover-build-channel.jpg`
 
 Note the filename typo: `port_backgounrd.png` is intentional because the user provided/used that name. Do not silently rename it unless updating references everywhere.
 
@@ -272,6 +294,15 @@ Note the filename typo: `port_backgounrd.png` is intentional because the user pr
 7. `npm` may fail in PowerShell because `npm.ps1` execution is blocked.
    Use `npm.cmd`.
 
+8. Do not add `mailto:` / `tel:` / `href` to social dock icons.
+   They are display-only — only the tooltip surfaces info.
+
+9. Do not reintroduce `dragRef.current.active` or other transient drag fields.
+   `dragRef` was reduced to `{ moved }`. All other drag state lives inside the `startDrag` closure. A stale `active` reference broke the Vercel typecheck once.
+
+10. If the dev server starts returning HTTP 500 on `/_next/static/...` after a refactor:
+    `taskkill /F /IM node.exe`, `rm -rf .next`, then restart `npm.cmd run dev`.
+
 ## Current Verification Status
 
 At the time this handoff was written:
@@ -285,10 +316,10 @@ At the time this handoff was written:
 
 Potential next tasks:
 
-- Add content editing or real links for social icons.
+- Wire YouTube channel link into the YouTube dock icon when the channel goes live (currently labelled `Coming Soon`).
 - Add persistent positions for dragged thumbnails using `localStorage`.
-- Add z-index focus ordering for windows when clicked.
 - Add draggable window resize handles.
 - Add a Notes data model and selectable notes.
 - Add mobile-specific dock/window layout refinements.
 - Add keyboard accessibility for window close/minimize/zoom.
+- Build out content for the Build a Channel and Multimedia Courses windows when source material is ready.
