@@ -1,8 +1,7 @@
 ﻿export const dockSocials = [
-  { label: "YouTube", imageSrc: "/image/youtube.svg" },
-  { label: "Instagram", imageSrc: "/image/instagram.svg" },
-  { label: "Gmail", imageSrc: "/image/gmail.svg" },
-  { label: "Zalo", imageSrc: "/image/zalo.svg" },
+  { label: "YouTube · Coming Soon", imageSrc: "/image/youtube.svg" },
+  { label: "hoangcd.contact@gmail.com", imageSrc: "/image/gmail.svg" },
+  { label: "Zalo · 0332038903", imageSrc: "/image/zalo.svg" },
 ] as const;
 
 export const aboutStats = [
